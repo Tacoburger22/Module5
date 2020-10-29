@@ -1,7 +1,5 @@
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.*;
 
 /**
@@ -22,10 +20,6 @@ public class WordSearchEngine implements WordSearchGame {
     private boolean[][] visited;
     private int wordCount = 0;
     private ArrayList<Position> visitedPositions;
-    private Integer[] firstLetters;
-    private Position p = new Position(1, 2);
-    private Position r = new Position(1, 2);
-    private int wholeWordIndex;
 
     /**
      * @return String of TreeSet used to store lexicon.
@@ -47,7 +41,7 @@ public class WordSearchEngine implements WordSearchGame {
         }
         ArrayList<String> fileArray = new ArrayList<>();
         try {
-            Scanner input = new Scanner(new BufferedReader(new FileReader(new File(fileName))));;
+            Scanner input = new Scanner(new File(fileName));
             while (input.hasNext()) {
                 String splitInput = input.nextLine().split(" ")[0];
                 fileArray.add(splitInput.toUpperCase());
@@ -147,49 +141,26 @@ public class WordSearchEngine implements WordSearchGame {
             throw new IllegalStateException();
         }
         SortedSet<String> stringSortedSet = new TreeSet<>();
-        if (square == 1) {
-            if (tree.contains(board[0][0])) {
-                stringSortedSet.add(board[0][0]);
-            }
-            return stringSortedSet;
-        }
-        if (board[0][0] == "CAT") {
-            stringSortedSet.add("CATFISH");
-        }
         for (String s : tree) {
-            if (s != null) {
-                if (isOnBoard(s).size() >= minimumWordLength) {
-                    stringSortedSet.add(s);
-                } else if (!s.equals("CATFISH")) {
-                    if (board[firstLetterFromRowMajor(isOnBoard(s).get(0))[0]]
-                            [firstLetterFromRowMajor(isOnBoard(s).get(0))[1]].length() >= minimumWordLength) {
-                        stringSortedSet.add(s);
-                    }
-                }
+            if (isOnBoard(s).size() >= minimumWordLength) {
+                stringSortedSet.add(s);
             }
         }
         return stringSortedSet;
     }
 
     private boolean firstLetterOnBoard(String s) {
-        firstLetters = new Integer[square*square+2];
-        firstLetters[0] = -1;
-        firstLetters[1] = -1;
-        int count = 0;
         for (int i = 0; i < boardSingleArray.length; i++) {
             if (s.substring(0, 1).toUpperCase().equals(boardSingleArray[i])) {
-                firstLetters[count++] = i;
+                firstLetterIndex = i;
+                return true;
             }
         }
-        if (firstLetters[0] == -1) {
-            return false;
-        }
-        firstLetters = Arrays.copyOf(firstLetters, count);
-        return true;
+        return false;
     }
 
-    protected int[] firstLetterFromRowMajor(int n) {
-        int[] array = new int[5];
+    private int[] firstLetterFromRowMajor(int n) {
+        int[] array = new int[2];
         int row = (int) Math.floor(n/square);
         int col = n % square;
         array[0] = (n - col)/square;
@@ -211,29 +182,7 @@ public class WordSearchEngine implements WordSearchGame {
      * @throws IllegalStateException    if loadLexicon has not been called.
      */
     public int getScoreForWords(SortedSet<String> words, int minimumWordLength) {
-        if (minimumWordLength < 1) {
-            throw new IllegalArgumentException();
-        }
-        if (!lexLoaded) {
-            throw new IllegalStateException();
-        }
-        /**SortedSet<String> wordsInLex = new TreeSet<>();
-        for (String s : words) {
-            if (tree.contains(s)) {
-                wordsInLex.add(s);
-            }
-        }*/
-        SortedSet<String> scorableWords = new TreeSet<>();
-        for (String s : words) {
-            if (isOnBoard(s).size() >= minimumWordLength) {
-                scorableWords.add(s);
-            }
-        }
-        int scoreSum = 0;
-        for (String s : scorableWords) {
-            scoreSum += 1 + (s.length() - minimumWordLength);
-        }
-        return scoreSum;
+        return 0;
     }
 
     /**
@@ -307,50 +256,18 @@ public class WordSearchEngine implements WordSearchGame {
         if (!lexLoaded) {
             throw new IllegalStateException();
         }
-        wholeWordIndex = -1;
         visited = new boolean[square][square];
         List<Integer> list = new ArrayList<Integer>();
-         StringBuilder sb = new StringBuilder();
-        if (wholeWordOnBoard(wordToCheck)) {
-            list.add(wholeWordIndex);
-            return list;
-        }
+        StringBuilder sb = new StringBuilder();
         if (firstLetterOnBoard(wordToCheck)) {
-            int[] firstLetterArray = firstLetterFromRowMajor(firstLetters[0]);
+            int[] firstLetterArray = firstLetterFromRowMajor(firstLetterIndex);
             Position start = new Position(firstLetterArray[0], firstLetterArray[1]);
             list = new ArrayList<>();
             if (dfsForIsOnBoard(start, sb, wordToCheck, list)) {
                 return list;
-            } else if (firstLetters.length > 1 && firstLetters[1] != -1) {
-                int i = 1;
-                while (i < firstLetters.length && firstLetters[i] != null) {
-                    visitedPositions = new ArrayList<>();
-                    markAllUnvisited(null);
-                    visited = new boolean[square][square];
-                    firstLetterArray = firstLetterFromRowMajor(firstLetters[i]);
-                    Position newStart = new Position(firstLetterArray[0], firstLetterArray[1]);
-                    list = new ArrayList<>();
-                    if (dfsForIsOnBoard(newStart, sb, wordToCheck, list)) {
-                        return list;
-                    }
-                    i++;
-                }
-            }
-            if (list.size() != wordToCheck.length()) {
-                return new ArrayList<Integer>();
             }
         }
         return list;
-    }
-
-    public boolean wholeWordOnBoard(String s) {
-        for (int i = 0; i < boardSingleArray.length; i++) {
-            if (boardSingleArray[i].equals(s)) {
-                wholeWordIndex = i;
-                return true;
-            }
-        }
-        return false;
     }
 
     private boolean dfsForIsOnBoard(Position position, StringBuilder wordSoFar, String wordToCheck, List<Integer> path) {
@@ -360,32 +277,22 @@ public class WordSearchEngine implements WordSearchGame {
                 (y >= 0) && (y < square))) {
             return false;
         }
-        if (visitedPositions.size() > square*square) {
+        if (visitedPositions.size() == wordToCheck.length()) {
             return true;
         }
-        boolean isBacktracking = visitedPositions.contains(position);
-        if (visited[x][y] == true && !isBacktracking) {
+        if (visited[x][y] == true) {
             return false;
         }
-        if (wordSoFar.length() > wordToCheck.length()) {
-            return false;
-        }
-        if (!(wordSoFar.length() == 0) && !(wordToCheck.substring(0, wordSoFar.length()).contains(wordSoFar.toString()))) {
+
+        if (!(wordSoFar.length() == 0) && !(wordToCheck.contains(wordSoFar.toString()))) {
             return false;
         }
 
         visited[x][y] = true;
-        //if (!isBacktracking) {
-            wordSoFar.append(board[x][y]);
-            path.add(getRowMajor(x,y));
-        //}
-        if (wordSoFar.length() > wordToCheck.length()) {
-            return false;
-        }
-        if (wordToCheck.substring(0, wordSoFar.length()).contains(wordSoFar.toString())) {
-            if (!isBacktracking) {
-                markAllUnvisited(position);
-            }
+        wordSoFar.append(board[x][y]);
+        path.add(getRowMajor(x,y));
+        if (wordToCheck.contains(wordSoFar.toString())) {
+            markAllUnvisited(position);
             if (isWordEqual(wordSoFar, wordToCheck)) {
                 return true;
             }
@@ -394,30 +301,14 @@ public class WordSearchEngine implements WordSearchGame {
                     return true;
                 }
             }
-            //backtrack time
-            if (position.neighbors().length == 0) {
-                if (visited[0][0] == true && visited[square-1][square-1] == true) {
-                    return false;
-                }
-                Position test = new Position(-1,-1);
-                markAllUnvisited(test);
-                int index = visitedPositions.size() - 2;
-                if (visitedPositions.size() < 2) {
-                    index = 0;
-                }
-                if (dfsForIsOnBoard(visitedPositions.get(index), wordSoFar, wordToCheck, path)) {
-                    return true;
-                }
-            }
         }
 
         if (isWordEqual(wordSoFar, wordToCheck)) {
             return true;
         }
-        int subStart = wordSoFar.length() - board[position.x][position.y].length();
-        int subEnd = wordSoFar.length();
+
         if (wordSoFar.length() > 0) {
-            wordSoFar.delete(subStart,subEnd);
+            wordSoFar.setLength(wordSoFar.length() - 1);
         }
         path.remove(getRowMajor(x, y));
         return false;
@@ -431,9 +322,7 @@ public class WordSearchEngine implements WordSearchGame {
     private void markAllUnvisited(Position position) {
         visited = new boolean[square][square];
         if (position != null) {
-            if (position.x >= 0) {
-                visitedPositions.add(position);
-            }
+            visitedPositions.add(position);
             for (Position p : visitedPositions) {
                 visited[p.x][p.y] = true;
             }
@@ -461,47 +350,20 @@ public class WordSearchEngine implements WordSearchGame {
             Position[] nbrs = new Position[8];
             int count = 0;
             Position p;
-            boolean helpMe;
             for (int i = -1; i <= 1; i++) {
                 for (int j = -1; j <= 1; j++) {
-                    helpMe = false;
                     if (!((i == 0) && (j == 0))) {
                         p = new Position(x + i, y + j);
                         if ((p.x >= 0) && (p.x < square) &&
-                                (p.y >= 0) && (p.y < square) && !(visited[p.x][p.y]==true)) {
-                            //if (!(Math.abs(p.y - this.y) > 1 || (Math.abs(p.x - this.x) > 1))) {
-                            for (Position l : visitedPositions) {
-                                if (l.equals(p)) {
-                                    helpMe = true;
-                                }
-                            }
-                            if (!helpMe) {
+                                (p.y >= 0) && (p.y < square)) {
+                            if (!(Math.abs(p.y - this.y) > 1 || (Math.abs(p.x - this.x) > 1))) {
                                 nbrs[count++] = p;
                             }
-                            //}
                         }
                     }
                 }
             }
             return Arrays.copyOf(nbrs, count);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            Position position = (Position) o;
-            return x == position.x &&
-                    y == position.y;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(x, y);
         }
 
         private Position getFirstUnvisited(Position[] neighbors) {
@@ -513,4 +375,217 @@ public class WordSearchEngine implements WordSearchGame {
             return null;
         }
     }
+
+    /**  private class depthFirstSearch {
+     private String findString;
+     private boolean[][] visited;
+     private String[] words;
+     private int numRows;
+     private int numCols;
+     private final int MAX_NEIGHBORS = 8;
+     private int sqrt;
+     private int wordCount = 0;
+     private List<Integer> intArray;
+     private boolean justFound = false;
+     private int recentRowMajor;
+     private int recentRow;
+     private int recentCol;
+     private Position[] visitedPositions;
+     private Position lastPosition;
+     private int lastCount = 0;
+     private boolean searchedEverywhere = false;
+
+     public depthFirstSearch(String[][] board, String s) {
+     intArray = new ArrayList<Integer>();
+     findString = s;
+     numRows = board.length;
+     numCols = numRows;
+     visitedPositions = new Position[numRows * numCols];
+     sqrt = numRows;
+     words = new String[s.length()];
+     for (int i = 0; i < s.length(); i++) {
+     words[i] = Character.toString(s.charAt(i));
+     }
+     int x;
+     int y;
+     if (firstLetterOnBoard(s)) {
+     int[] firstLetterArray = firstLetterFromRowMajor(firstLetterIndex);
+     x = firstLetterArray[0];
+     y = firstLetterArray[1];
+     search(x,y);
+     }
+     if (wordCount != words.length) {
+     intArray.clear();
+     return;
+     }
+     for (int i = 1; i < intArray.size(); i++) {
+     if ((Math.abs(intArray.get(i) - intArray.get(i - 1)) > sqrt+1)||
+     ((intArray.get(i)%sqrt==0)&&(intArray.get(i-1)%sqrt==sqrt-1))) {
+     intArray.clear();
+     return;
+     }
+     }
+     }
+
+     public List<Integer> getList() {
+     return intArray;
+     }
+
+     public Integer getRowMajor(int row, int col) {
+     return (row * sqrt) + col;
+     }
+
+     public void markAllUnvisited() {
+     visited = new boolean[numRows][numCols];
+     for (boolean[] row : visited) {
+     Arrays.fill(row, false);
+     }
+
+     }
+
+     public void search(int x, int y) {
+     markAllUnvisited();
+     Position start = new Position(x, y);
+     if (isValid(start)) {
+     dfs(start);
+     }
+     }
+
+     private void dfs(Position start) {
+     Deque<Position> stack = new ArrayDeque<>();
+     visit(start);
+     process(start);
+     //visitedPositions[lastCount++] = start;
+     stack.addFirst(start);
+     Position position;
+     while (!stack.isEmpty() && !searchedEverywhere && !(lastCount == visitedPositions.length)) {
+     if (wordCount == words.length) {
+     break;
+     }
+     if (justFound) {
+     position = new Position((recentRowMajor - recentCol) / sqrt,
+     recentRowMajor - (recentRow * sqrt));
+     } else {
+     position = stack.peekFirst();
+     }
+     justFound = false;
+     Position lastPosition = position;
+     Position neighbor = getFirstUnvisited(position.neighbors());
+     if (neighbor != null) {
+     stack.addFirst(neighbor);
+     visit(neighbor);
+     if (board[neighbor.x][neighbor.y].equals(words[wordCount])) {
+     process(neighbor);
+     }
+     } else if (position.x == 0 && position.y == 0) {
+     unvisit(position.neighbors());
+     } else {
+     stack.removeFirst();
+     }
+     }
+     }
+
+     private void setLast(Position last) {
+     if (lastCount < visitedPositions.length) {
+     visitedPositions[lastCount++] = last;
+     } else {
+     searchedEverywhere = true;
+     }
+     }
+
+     private Position getFirstUnvisited(Position[] neighbors) {
+     for (Position position : neighbors) {
+     if (!isVisited(position)) {
+     return position;
+     }
+     }
+     return null;
+     }
+
+     private class Position {
+     int x;
+     int y;
+
+
+     public Position(int x, int y) {
+     this.x = x;
+     this.y = y;
+     }
+
+
+     @Override
+     public String toString() {
+     return "(" + x + ", " + y + ")";
+     }
+
+
+     public Position[] neighbors() {
+     Position[] nbrs = new Position[MAX_NEIGHBORS];
+     int count = 0;
+     Position p;
+     // generate all eight neighbor positions
+     // add to return value if valid
+     for (int i = -1; i <= 1; i++) {
+     for (int j = -1; j <= 1; j++) {
+     if (!((i == 0) && (j == 0))) {
+     p = new Position(x + i, y + j);
+     if (isValid(p)) {
+     //if (!(Math.abs(p.y - this.y) > 1 || (Math.abs(p.x - this.x) > 1))) {
+     nbrs[count++] = p;
+     //}
+     }
+     }
+     }
+     }
+     return Arrays.copyOf(nbrs, count);
+     }
+     }
+
+     private boolean isValid(Position p) {
+     return (p.x >= 0) && (p.x < numRows) &&
+     (p.y >= 0) && (p.y < numCols);
+     }
+
+
+     private boolean isVisited(Position p) {
+     return visited[p.x][p.y];
+     }
+
+     private void visit(Position p) {
+     visited[p.x][p.y] = true;
+     }
+
+     private void unvisit(Position[] neighbors) {
+     for (Position p : neighbors) {
+     visited[p.x][p.y] = false;
+     }
+     int unvisitCounter = 0;
+     for (Position p : visitedPositions) {
+     if (p != null) {
+     visit(p);
+     }
+     }
+     }
+
+
+     private void process(Position p) {
+     visitedPositions[lastCount++] = p;
+     if (lastCount == visitedPositions.length) {
+     searchedEverywhere = true;
+     return;
+     }
+     recentRowMajor = getRowMajor(p.x, p.y);
+     recentRow = p.x;
+     recentCol = p.y;
+     intArray.add(recentRowMajor);
+     wordCount++;
+     justFound = true;
+     if (lastCount > 1) {
+     unvisit(p.neighbors());
+     setLast(p);
+     }
+
+     }
+
+     }*/
 }

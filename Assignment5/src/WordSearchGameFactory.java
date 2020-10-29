@@ -25,15 +25,13 @@ public class WordSearchGameFactory {
                 ,"H","Y","U","L","P","M","O","U","S","E","C","B","I","I","U","I"};
         String[] stringArray2 = new String[]{"TIGER",};
         String[] stringArray3 = new String[]{"CAT", "X", "FISH", "XXXX"};
-        game.setBoard(stringArray3);
+        String[] stringArray4 = new String[]{"A", "B", "C", "D", "E", "E", "F", "H", "M", };
+        game.setBoard(stringArray4);
         System.out.println(game.getBoard() + "\n");
-        game.loadLexicon("words_medium.txt");
+        game.loadLexicon("words_small.txt");
         String treeString = ((WordSearchEngine) game).getTreeString();
         System.out.println(treeString);
-        System.out.println("\"whom\" is present: " + game.isValidWord("whom"));
-        //List<Integer> list = game.isOnBoard("BEAD");
-        //int size = list.size(); BENTY, CENTO, and LENTO
-        System.out.println(game.isOnBoard("CAT"));
+        System.out.println(game.isOnBoard("BEAD"));
         System.out.println(game.getAllScorableWords(3));
         System.out.println(game.getScoreForWords(game.getAllScorableWords(3), 3));
     }
