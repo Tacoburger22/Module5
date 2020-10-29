@@ -165,7 +165,29 @@ public class WordSearchEngine implements WordSearchGame {
      * @throws IllegalStateException    if loadLexicon has not been called.
      */
     public int getScoreForWords(SortedSet<String> words, int minimumWordLength) {
-        return 0;
+        if (minimumWordLength < 1) {
+            throw new IllegalArgumentException();
+        }
+        if (!lexLoaded) {
+            throw new IllegalStateException();
+        }
+        /**SortedSet<String> wordsInLex = new TreeSet<>();
+         for (String s : words) {
+         if (tree.contains(s)) {
+         wordsInLex.add(s);
+         }
+         }*/
+        SortedSet<String> scorableWords = new TreeSet<>();
+        for (String s : words) {
+            if (isOnBoard(s).size() >= minimumWordLength) {
+                scorableWords.add(s);
+            }
+        }
+        int scoreSum = 0;
+        for (String s : scorableWords) {
+            scoreSum += 1 + (s.length() - minimumWordLength);
+        }
+        return scoreSum;
     }
 
     /**
