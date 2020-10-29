@@ -171,12 +171,12 @@ public class WordSearchEngine implements WordSearchGame {
         if (!lexLoaded) {
             throw new IllegalStateException();
         }
-        /**SortedSet<String> wordsInLex = new TreeSet<>();
+        SortedSet<String> wordsInLex = new TreeSet<>();
          for (String s : words) {
-         if (tree.contains(s)) {
-         wordsInLex.add(s);
+             if (tree.contains(s)) {
+                 wordsInLex.add(s);
+             }
          }
-         }*/
         SortedSet<String> scorableWords = new TreeSet<>();
         for (String s : words) {
             if (isOnBoard(s).size() >= minimumWordLength) {
