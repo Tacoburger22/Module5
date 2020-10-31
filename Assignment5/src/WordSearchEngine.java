@@ -140,13 +140,6 @@ public class WordSearchEngine implements WordSearchGame {
         if (!lexLoaded) {
             throw new IllegalStateException();
         }
-        for (String s : boardSingleArray) {
-            if (s.equals("TIGER") && minimumWordLength <= 5) {
-                SortedSet<String> stringSortedSet = new TreeSet<String>();
-                stringSortedSet.add("TIGER");
-                return stringSortedSet;
-            }
-        }
         SortedSet<String> scoreWords = new TreeSet<>();
         for (String s : tree) {
             if (s.length() >= minimumWordLength && !(isOnBoard(s).isEmpty())) {
