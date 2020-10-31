@@ -1,3 +1,6 @@
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 /**
  * Provides a factory method for creating word search games.
  */
@@ -8,7 +11,7 @@ public class WordSearchGameFactory {
      * interface.
      */
     public static WordSearchGame createGame() {
-        return (WordSearchGame) new WordSearchEngine();
+        return new WordSearchEngine();
     }
 
     public static void main(String[] args) {
@@ -23,17 +26,16 @@ public class WordSearchGameFactory {
                 ,"I","B","T","Q","O","C","V","R","O","T","X","H","C","R","W","S","A","V","T","N","U","I","O","W","X","C","O","R","X","Q","A","S","A","S","S","E","M","B","L","Y","O","Z","F"
                 ,"P","L","S","C","I","T","L","U","M","O","N","I","T","O","R","J","W","I","N","L","L","L","E","L","J","R","R","E","M","M","O","B","D","X","I","J","D","S","R","L","C","H","S"
                 ,"H","Y","U","L","P","M","O","U","S","E","C","B","I","I","U","I"};
-        String[] stringArray2 = new String[]{"TIGER",};
-        String[] stringArray3 = new String[]{"CAT", "X", "FISH", "XXXX"};
-        String[] stringArray4 = new String[]{"A", "B", "C", "D", "E", "E", "F", "H", "M", };
-        game.setBoard(stringArray4);
-        System.out.println(game.getBoard() + "\n");
+        String[] stringArray1 = new String[]{"A", "B", "C", "D", "E", "E", "F", "H", "M", };
+        String[] stringArray2 = new String[]{"H", "E", "B", "E", "Z", "K", "T", "S", "T"};
+        String[] stringArray3 = new String[]{"U","G","I","A","O","H","S","S","T","U","E","T","Y","N","T","W",};
+        game.setBoard(stringArray);
         game.loadLexicon("words_small.txt");
-        String treeString = ((WordSearchEngine) game).getTreeString();
-        System.out.println(treeString);
-        System.out.println(game.isOnBoard("BEAD"));
-        System.out.println(game.getAllScorableWords(3));
-        System.out.println(game.getScoreForWords(game.getAllScorableWords(3), 3));
+        int minimum = 7;
+        System.out.println("Score for all words of minimum length " + minimum +":");
+        SortedSet<String> strings = game.getAllScorableWords(minimum);
+        System.out.println(strings);
+        System.out.println("Score: " + game.getScoreForWords(strings,minimum));
     }
 
 }
