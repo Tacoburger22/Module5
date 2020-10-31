@@ -16,22 +16,11 @@ public class WordSearchEngine implements WordSearchGame {
     protected int square = 4;
     private String[] boardSingleArray = new String[]{"E", "E", "C", "A",
             "A", "L", "E", "P", "H", "N", "B", "O", "Q", "T", "T", "Y"};
-    private int firstLetterIndex;
     private boolean[][] visited;
-    private int wordCount = 0;
     private ArrayList<Position> posPath;
-    private Integer[] firstLetters;
-    private int wholeWordIndex;
     private ArrayList<Integer> path;
     private String wordSoFar;
     private Position start;
-
-    /**
-     * @return String of TreeSet used to store lexicon.
-     */
-    protected String getTreeString() {
-        return tree.toString();
-    }
 
     /**
      * Loads the lexicon into a data structure for later use.
@@ -298,53 +287,13 @@ public class WordSearchEngine implements WordSearchGame {
         TreeSet<Integer> treeSetCheck = new TreeSet<>();
         treeSetCheck.addAll(path);
         if (treeSetCheck.size() != path.size()) {
-            return new ArrayList<Integer>();
+            return new ArrayList<>();
         }
         return path;
     }
 
-    private boolean firstLetterOnBoard(String s) {
-        firstLetters = new Integer[square * square + 2];
-        firstLetters[0] = -1;
-        firstLetters[1] = -1;
-        int count = 0;
-        for (int i = 0; i < boardSingleArray.length; i++) {
-            if (s.substring(0, 1).toUpperCase().equals(boardSingleArray[i])) {
-                firstLetters[count++] = i;
-            }
-        }
-        if (firstLetters[0] == -1) {
-            return false;
-        }
-        firstLetters = Arrays.copyOf(firstLetters, count);
-        return true;
-    }
-
-    private int[] firstLetterFromRowMajor(int n) {
-        int[] array = new int[5];
-        int row = (int) Math.floor(n / square);
-        int col = n % square;
-        array[0] = (n - col) / square;
-        array[1] = n - (row * square);
-        return array;
-    }
-
-    private boolean wholeWordOnBoard(String s) {
-        for (int i = 0; i < boardSingleArray.length; i++) {
-            if (boardSingleArray[i].equals(s)) {
-                wholeWordIndex = i;
-                return true;
-            }
-        }
-        return false;
-    }
-
     private boolean dfsForIsOnBoard(Position position, String wordSoFar, String wordToCheck, List pos) {
-        if (!isValid(position)) {
-            pos.remove(position);
-            return false;
-        }
-        if (isVisited(position)) {
+        if (!isValid(position) || isVisited(position)) {
             pos.remove(position);
             return false;
         }
@@ -376,24 +325,6 @@ public class WordSearchEngine implements WordSearchGame {
         return false;
     }
 
-    private boolean isWordEqual(StringBuilder wordSoFar, String wordToCheck) {
-        return wordSoFar.toString().equals(wordToCheck);
-    }
-
-    private void markAllUnvisited(Position position) {
-        visited = new boolean[square][square];
-        if (position != null) {
-            posPath.add(position);
-            for (Position p : posPath) {
-                visited[p.x][p.y] = true;
-            }
-        }
-    }
-
-    public Integer getRowMajor(int row, int col) {
-        return (row * square) + col;
-    }
-
     private class Position {
         int x;
         int y;
@@ -403,18 +334,16 @@ public class WordSearchEngine implements WordSearchGame {
             this.y = y;
         }
 
-        @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             Position position = (Position) o;
             return x == position.x &&
                     y == position.y;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(x, y);
         }
 
         public String toString() {
@@ -443,15 +372,6 @@ public class WordSearchEngine implements WordSearchGame {
             return Arrays.copyOf(nbrs, count);
         }
 
-
-        private Position getFirstUnvisited(Position[] neighbors) {
-            for (Position position : neighbors) {
-                if (!visited[position.x][position.y]) {
-                    return position;
-                }
-            }
-            return null;
-        }
     }
 
     public void markAllUnvisited() {
@@ -465,7 +385,6 @@ public class WordSearchEngine implements WordSearchGame {
         return (p.x >= 0) && (p.x < square) &&
                 (p.y >= 0) && (p.y < square);
     }
-
 
     private boolean isVisited(Position p) {
         return visited[p.x][p.y];

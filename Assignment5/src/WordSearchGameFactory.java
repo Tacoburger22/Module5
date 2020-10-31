@@ -31,7 +31,7 @@ public class WordSearchGameFactory {
         String[] stringArray3 = new String[]{"U","G","I","A","O","H","S","S","T","U","E","T","Y","N","T","W",};
         game.setBoard(stringArray);
         game.loadLexicon("words_small.txt");
-        int minimum = 7;
+        int minimum = 3;
         System.out.println("Score for all words of minimum length " + minimum +":");
         SortedSet<String> strings = game.getAllScorableWords(minimum);
         System.out.println(strings);
